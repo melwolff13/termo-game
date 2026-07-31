@@ -1,8 +1,8 @@
-"""cria tabela partidas
+"""criando_tabela_partidas
 
-Revision ID: 752eecf20019
+Revision ID: 6b5f4728afc5
 Revises: d02aa0b0a97c
-Create Date: 2026-07-19 23:20:53.434954
+Create Date: 2026-07-30 22:53:37.173931
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '752eecf20019'
+revision: str = '6b5f4728afc5'
 down_revision: Union[str, Sequence[str], None] = 'd02aa0b0a97c'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -25,9 +25,10 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('jogador_id', sa.String(), nullable=False),
     sa.Column('palavra_secreta_id', sa.Integer(), nullable=False),
-    sa.Column('status', sa.Enum('EM_ANDAMENTO', 'VENCEU', 'PERDEU', name='statuspartida'), nullable=False),
+    sa.Column('status', sa.Enum('EM_ANDAMENTO', 'VENCEU', 'PERDEU', name='status_partida_enum'), nullable=False),
+    sa.Column('qtd_tentativas', sa.Integer(), nullable=False),
     sa.Column('iniciada_em', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
-    sa.Column('finalizada_em', sa.DateTime(), nullable=False),
+    sa.Column('finalizada_em', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['palavra_secreta_id'], ['palavras.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -42,5 +43,4 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_partidas_jogador_id'), table_name='partidas')
     op.drop_index(op.f('ix_partidas_id'), table_name='partidas')
     op.drop_table('partidas')
-    sa.Enum(name='statuspartida').drop(op.get_bind())
     # ### end Alembic commands ###

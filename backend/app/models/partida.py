@@ -14,10 +14,10 @@ class Partida(Base):
     id = Column(Integer, primary_key=True, index=True)
     jogador_id = Column(String, nullable=False, index=True)
     palavra_secreta_id = Column(Integer, ForeignKey("palavras.id"),nullable=False)
-    status = Column(Enum(StatusPartida), default=StatusPartida.EM_ANDAMENTO, nullable=False, )
-    tentativas = Column(Integer, nullable=False)
+    status = Column(Enum(StatusPartida, name="status_partida_enum"), default=StatusPartida.EM_ANDAMENTO, nullable=False, )
+    qtd_tentativas = Column(Integer, nullable=False, default=0)
     iniciada_em = Column(DateTime, server_default=func.now(), nullable=False)
-    finalizada_em = Column(DateTime, nullable=False)
+    finalizada_em = Column(DateTime, nullable=True)
 
     palavra_secreta = relationship("Palavra")
     tentativas = relationship("Tentativa",back_populates="partida")
