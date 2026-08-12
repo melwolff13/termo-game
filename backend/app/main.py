@@ -1,7 +1,6 @@
 from fastapi import FastAPI
+from app.routers import partidas
 
 app = FastAPI()
 
-@app.get("/")
-def teste():
-    return {"Teste" : "Oi"}
+app.include_router(partidas.router)
