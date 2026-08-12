@@ -1,7 +1,9 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
-from app.database import SessionLocal
+from datetime import datetime, timezone
 from app.models.palavra import Palavra
+from app.models.partida import Partida, StatusPartida
+from app.models.tentativa import Tentativa
 
 def sortear_palavra(db: Session):
     palavra = (
@@ -10,12 +12,26 @@ def sortear_palavra(db: Session):
         .order_by(func.random())
         .first()
     )
+    if palavra is None:
+        raise ValueError("Nenhuma palavra disponível no banco.")
 
     return palavra
 
-def comparar(tentativa: str, palavra_secreta:str):
+def criar_partida(jogador_id: str, db: Session):
+    palavra_secreta = sortear_palavra(db)
+    nova_partida = Partida(
+        jogador_id = jogador_id,
+        palavra_secreta_id = palavra_secreta.id
+    )
+    db.add(nova_partida)
+    db.commit()
+    db.refresh(nova_partida)
+
+    return nova_partida
+
+
+def comparar(tentativa: str, palavra_secreta: str):
     resultado = []
-    tentativa = tentativa.upper()
 
     contador = {}
     for letra in palavra_secreta:
@@ -41,25 +57,53 @@ def comparar(tentativa: str, palavra_secreta:str):
 
     return(resultado)
 
+def validar_tentativa(tentativa: str, db: Session):
+    if len(tentativa) != 5: 
+        raise ValueError("A palavra deve conter 5 letras.")
+    
+    if not tentativa.isalpha():
+        raise ValueError("A palavra deve conter apenas letras.")
 
+    existe = (
+        db.query(Palavra)
+        .filter(Palavra.palavra == tentativa.upper())
+        .first()
+    )
 
+    if not existe:
+        raise ValueError("Palavra inválida.")
 
+def controlar_jogada(partida: Partida, jogada: str, db: Session):
+    if partida.status != StatusPartida.EM_ANDAMENTO:
+        raise ValueError("Partida já encerrada.")
 
+    validar_tentativa(jogada, db)
 
-if __name__ == "__main__":
-    db = SessionLocal()
-    try:
-        resultado = sortear_palavra(db)
-        palavra = resultado.palavra
+    resultado_tentativa = comparar(jogada, partida.palavra_secreta.palavra)
 
-        for i in range(5):
-            tentativa = input("tentativa: ")
-            jogada = comparar(tentativa, palavra)
-            if jogada == ["verde"]*5:
-                print("ebaa, acertou!")
-                break
-            else:
-                print(jogada)
-        print(f"a palavra era {palavra}")
-    finally:
-        db.close()
+    tentativa = Tentativa(
+        partida_id = partida.id,
+        jogada = jogada,
+        resultado = resultado_tentativa
+    )
+    db.add(tentativa)
+
+    partida.qtd_tentativas += 1
+
+    if resultado_tentativa == ["verde"]*5:
+        partida.status = StatusPartida.VENCEU
+        partida.finalizada_em = datetime.now(timezone.utc)
+
+    elif partida.qtd_tentativas >= 6:
+        partida.status = StatusPartida.PERDEU
+        partida.finalizada_em = datetime.now(timezone.utc)
+
+    db.commit()
+    db.refresh(tentativa)
+
+    return {
+        "jogada": tentativa.jogada,
+        "resultado": resultado_tentativa,
+        "tentativas_usadas": partida.qtd_tentativas,
+        "status": partida.status
+    }
