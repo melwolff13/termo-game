@@ -16,23 +16,35 @@ from app.database import SessionLocal
 from app.models import Palavra
 
 PALAVRAS = [
-    "carro", "porta", "livro", "campo", "banco",
-    "cabra", "pedra", "terra", "fonte", "grito",
-    "plano", "carta", "bolsa", "forca", "barco",
-    "caldo", "bravo", "sopro", "virar", "prova",
-    "tempo", "lugar", "mundo", "noite", "claro",
-    "saber", "fazer", "poder", "certo", "feliz",
-    "forte", "verde", "preto", "fundo", "baixo",
-    "cheio", "vazio", "cinco", "prato", "ponto",
-    "roupa", "vento", "tinta", "dente", "mente",
-    "casar", "lutar", "jogar", "pular", "corpo",
-    "rosto", "perna", "olhos", "nariz", "ombro",
-    "chuva", "fogo", "calor", "festa", "tarde",
-    "cinza", "prata", "areia", "linha", "papel",
-    "ferro", "vidro", "chave", "cobre", "nobre",
-    "justo", "mesmo", "velho", "jovem", "fraco"
-]
-
+    'forca', 'prova', 'saber', 'fazer', 'cinco', 'prato', 'vento', 'perna', 'olhos', 'zelar', 
+    'cinza', 'mesmo', 'velho', 'fraco', 'abrir', 'achar', 'acima', 'adiar', 'afeto', 'agora', 
+    'ajuda', 'amigo', 'andar', 'anexo', 'antes', 'apoio', 'areia', 'armar', 'aroma', 'assar', 
+    'astro', 'ativo', 'atuar', 'audaz', 'aviso', 'azedo', 'baixo', 'baile', 'banco', 'barco', 
+    'barra', 'beijo', 'bicho', 'blusa', 'bolsa', 'borda', 'brasa', 'bravo', 'brejo', 'brisa', 
+    'broto', 'cabra', 'cacho', 'caixa', 'caldo', 'calma', 'calor', 'campo', 'canal', 'canto', 
+    'capaz', 'carga', 'carne', 'carro', 'carta', 'casal', 'casar', 'casca', 'ceder', 'censo', 
+    'cerca', 'certo', 'chave', 'cheio', 'chuva', 'claro', 'cobre', 'coisa', 'colar', 'comer', 
+    'conta', 'coral', 'corpo', 'corte', 'costa', 'couro', 'criar', 'crise', 'culpa', 'curar', 
+    'curso', 'dardo', 'dente', 'dizer', 'dogma', 'dorso', 'duelo', 'durar', 'elite', 'errar', 
+    'falar', 'falha', 'fardo', 'farta', 'festa', 'feixe', 'feliz', 'feroz', 'ferro', 'fibra', 
+    'ficar', 'final', 'firma', 'fitar', 'fluir', 'focar', 'folha', 'fonte', 'forma', 'forte', 
+    'fraco', 'frase', 'freio', 'fruta', 'fugir', 'fundo', 'ganho', 'garra', 'gasto', 'gelar', 
+    'gerar', 'girar', 'golpe', 'gosto', 'grato', 'grito', 'grupo', 'guiar', 'honra', 'hotel', 
+    'idade', 'igual', 'impar', 'jogar', 'jovem', 'junto', 'justo', 'largo', 'laser', 'lazer', 
+    'leite', 'lenda', 'lento', 'limpo', 'linha', 'livro', 'local', 'louro', 'lugar', 'lutar', 
+    'magia', 'maior', 'manso', 'marca', 'matar', 'medir', 'menor', 'mente', 'metal', 'metro', 
+    'misto', 'moeda', 'morar', 'morro', 'mover', 'mundo', 'mural', 'museu', 'nadar', 'nariz', 
+    'natal', 'navio', 'negar', 'nervo', 'nobre', 'noite', 'norte', 'nuvem', 'obter', 'ombro', 
+    'ordem', 'ouvir', 'pacto', 'padre', 'pagar', 'palco', 'papel', 'parar', 'parte', 'passo', 
+    'pasta', 'pedra', 'pegar', 'peito', 'perto', 'pesca', 'piano', 'pilha', 'pingo', 'pista', 
+    'plano', 'poder', 'ponto', 'porta', 'praia', 'prata', 'prazo', 'preto', 'prova', 'pular', 
+    'queda', 'quilo', 'raiva', 'reino', 'repor', 'rezar', 'risco', 'ritmo', 'rocha', 'rosto', 
+    'roupa', 'saber', 'sabor', 'sacar', 'salto', 'selva', 'senso', 'serra', 'servo', 'sinal', 
+    'sobra', 'sogra', 'sonho', 'sopro', 'sorte', 'suave', 'subir', 'surto', 'talha', 'tarde', 
+    'tecer', 'tempo', 'tenro', 'terra', 'tinta', 'tirar', 'tocar', 'torre', 'trama', 'trapo', 
+    'trevo', 'troca', 'turma', 'urgir', 'valer', 'valor', 'vazio', 'verde', 'verbo', 'verme', 
+    'verso', 'veste', 'vidro', 'vigia', 'vigor', 'vinho', 'virar', 'vista', 'viver', 'vulto', 
+    ]
 def seed():
     db = SessionLocal()
     try:
