@@ -22,3 +22,22 @@ class TentativaResponse(BaseModel):
     tentativas_restantes: int
     status: StatusPartida
     palavra_secreta: str | None
+
+class EstadoPartidaRequest(BaseModel):
+    partida_id: str
+
+class EstadoPartidaResponse(BaseModel):
+    tentativas_usadas: int
+    tentativas_restantes: int
+    status: StatusPartida
+    palavra_secreta: str | None
+
+class EstatisticaRequest(BaseModel):
+    jogador_id: str
+
+class EstatisticaResponse(BaseModel):
+    qtd_partidas: int
+    qtd_vitorias: int
+    sequencia_atual: int
+    maior_sequencia: int
+
