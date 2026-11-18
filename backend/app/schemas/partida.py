@@ -15,9 +15,17 @@ class PartidaResponse(BaseModel):
 class EnviarTentativaRequest(BaseModel):
     jogada: str
 
-class TentativaResponse(BaseModel):
+class TentativaResponse(BaseModel): # usado no get /partidas/{partida_id} (EstadoPartidaResponse)
     jogada: str
     resultado: List[Literal["verde", "amarelo", "cinza"]]
+
+class ResultadoTentativaResponse(BaseModel): # retorno do post /partidas/{partida_id}/tentativa
+    jogada: str
+    resultado: list[str]
+    tentativas_usadas: int
+    tentativas_restantes: int
+    status: StatusPartida
+    palavra_secreta: str | None = None
 
 class EstadoPartidaRequest(BaseModel):
     partida_id: str
