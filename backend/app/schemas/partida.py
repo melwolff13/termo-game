@@ -18,19 +18,17 @@ class EnviarTentativaRequest(BaseModel):
 class TentativaResponse(BaseModel):
     jogada: str
     resultado: List[Literal["verde", "amarelo", "cinza"]]
-    tentativas_usadas: int
-    tentativas_restantes: int
-    status: StatusPartida
-    palavra_secreta: str | None
 
 class EstadoPartidaRequest(BaseModel):
     partida_id: str
 
 class EstadoPartidaResponse(BaseModel):
+    id: int
+    status: StatusPartida
     tentativas_usadas: int
     tentativas_restantes: int
-    status: StatusPartida
-    palavra_secreta: str | None
+    tentativas: list[TentativaResponse]
+    palavra_secreta: str | None = None
 
 class EstatisticaRequest(BaseModel):
     jogador_id: str
