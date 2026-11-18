@@ -5,6 +5,8 @@ from app.models.palavra import Palavra
 from app.models.partida import Partida, StatusPartida
 from app.models.tentativa import Tentativa
 
+MAX_TENTATIVAS = 6
+
 def sortear_palavra(db: Session):
     palavra = (
         db.query(Palavra)
@@ -94,7 +96,7 @@ def controlar_jogada(partida: Partida, jogada: str, db: Session):
         partida.status = StatusPartida.VENCEU
         partida.finalizada_em = datetime.now(timezone.utc)
 
-    elif partida.qtd_tentativas >= 6:
+    elif partida.qtd_tentativas >= MAX_TENTATIVAS:
         partida.status = StatusPartida.PERDEU
         partida.finalizada_em = datetime.now(timezone.utc)
 
@@ -105,5 +107,35 @@ def controlar_jogada(partida: Partida, jogada: str, db: Session):
         "jogada": tentativa.jogada,
         "resultado": resultado_tentativa,
         "tentativas_usadas": partida.qtd_tentativas,
-        "status": partida.status
+        "status": partida.status,
+        "palavra_secreta": (
+            partida.palavra_secreta.palavra if partida.status != StatusPartida.EM_ANDAMENTO else None
+        ),
     }
+
+def consultar_partida(partida_id: int, db: Session):
+    partida = db.query(Partida).filter(Partida.id == partida_id).first()
+    if partida is None:
+        raise ValueError("Partida não encontrada.")
+
+    tentativas = (
+        db.query(Tentativa)
+        .filter(Tentativa.partida_id == partida.id)
+        .order_by(Tentativa.id)
+        .all()
+    )
+
+    return {
+        "id": partida.id,
+        "status": partida.status,
+        "tentativas_usadas": partida.qtd_tentativas,
+        "tentativas_restantes": MAX_TENTATIVAS - partida.qtd_tentativas,
+        "tentativas": [
+            {"jogada": t.jogada, "resultado": t.resultado}
+            for t in tentativas
+        ],
+        "palavra_secreta": (
+            partida.palavra_secreta.palavra if partida.status != StatusPartida.EM_ANDAMENTO else None
+        ),
+    }
+
