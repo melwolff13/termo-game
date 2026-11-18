@@ -7,6 +7,9 @@ from app.models.tentativa import Tentativa
 
 MAX_TENTATIVAS = 6
 
+class PartidaNaoEncontrada(Exception):
+    pass
+
 def sortear_palavra(db: Session):
     palavra = (
         db.query(Palavra)
@@ -30,7 +33,6 @@ def criar_partida(jogador_id: str, db: Session):
     db.refresh(nova_partida)
 
     return nova_partida
-
 
 def comparar(tentativa: str, palavra_secreta: str):
     resultado = []
@@ -75,27 +77,30 @@ def validar_tentativa(tentativa: str, db: Session):
     if not existe:
         raise ValueError("Palavra inválida.")
 
-def controlar_jogada(partida: Partida, jogada: str, db: Session):
+def controlar_jogada(partida_id: int, jogada: str, db: Session):
+    partida = db.query(Partida).filter(Partida.id == partida_id).first()
+    if partida is None:
+        raise PartidaNaoEncontrada("Partida não encontrada.")
+
     if partida.status != StatusPartida.EM_ANDAMENTO:
         raise ValueError("Partida já encerrada.")
 
+    jogada = jogada.strip().upper()
     validar_tentativa(jogada, db)
 
     resultado_tentativa = comparar(jogada, partida.palavra_secreta.palavra)
 
     tentativa = Tentativa(
-        partida_id = partida.id,
-        jogada = jogada,
-        resultado = resultado_tentativa
+        partida_id=partida.id,
+        jogada=jogada,
+        resultado=resultado_tentativa,
     )
     db.add(tentativa)
-
     partida.qtd_tentativas += 1
 
-    if resultado_tentativa == ["verde"]*5:
+    if resultado_tentativa == ["verde"] * 5:
         partida.status = StatusPartida.VENCEU
         partida.finalizada_em = datetime.now(timezone.utc)
-
     elif partida.qtd_tentativas >= MAX_TENTATIVAS:
         partida.status = StatusPartida.PERDEU
         partida.finalizada_em = datetime.now(timezone.utc)
@@ -107,16 +112,19 @@ def controlar_jogada(partida: Partida, jogada: str, db: Session):
         "jogada": tentativa.jogada,
         "resultado": resultado_tentativa,
         "tentativas_usadas": partida.qtd_tentativas,
+        "tentativas_restantes": MAX_TENTATIVAS - partida.qtd_tentativas,
         "status": partida.status,
         "palavra_secreta": (
-            partida.palavra_secreta.palavra if partida.status != StatusPartida.EM_ANDAMENTO else None
+            partida.palavra_secreta.palavra
+            if partida.status != StatusPartida.EM_ANDAMENTO
+            else None
         ),
     }
 
 def consultar_partida(partida_id: int, db: Session):
     partida = db.query(Partida).filter(Partida.id == partida_id).first()
     if partida is None:
-        raise ValueError("Partida não encontrada.")
+        raise PartidaNaoEncontrada("Partida não encontrada.")
 
     tentativas = (
         db.query(Tentativa)
