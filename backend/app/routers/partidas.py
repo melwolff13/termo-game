@@ -27,23 +27,13 @@ def post_criar_partida(body: CriarPartidaRequest, db=Depends(get_db)):
     )
 
 @router.get("/{partida_id}", response_model=EstadoPartidaResponse, status_code=200)
-def get_partida(partida_id:int, db=Depends(get_db)):
+def get_partida(partida_id: int, db: Session = Depends(get_db)):
+    try:
+        estado = consultar_partida(partida_id, db)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
-    partida = db.query(Partida).filter(Partida.id == partida_id).first()
-
-    if partida is None:
-        raise HTTPException(status_code=404,detail="Partida não encontrada")
-
-    palavra_revelada = None
-    if partida.status != StatusPartida.EM_ANDAMENTO:
-        palavra_revelada = partida.palavra_secreta.palavra
-
-    return EstadoPartidaResponse(
-        tentativas_usadas = partida.qtd_tentativas,
-        tentativas_restantes = 6 - partida.qtd_tentativas,
-        status =  partida.status,
-        palavra_secreta = palavra_revelada
-    )
+    return estado
 
 
 @router.post("/{partida_id}/tentativa", response_model=TentativaResponse, status_code=200)
