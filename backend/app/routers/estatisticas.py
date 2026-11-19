@@ -1,8 +1,9 @@
-from app.models import *
-from app.schemas.partida import *
-from app.services.jogo import *
 from fastapi import APIRouter, Depends
-from app.database import *
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.schemas.partida import EstatisticaResponse
+from app.services.jogo import calcular_estatisticas
 
 router = APIRouter(
     prefix="/stats",

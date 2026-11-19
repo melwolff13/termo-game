@@ -10,6 +10,12 @@ MAX_TENTATIVAS = 6
 class PartidaNaoEncontrada(Exception):
     pass
 
+class PartidaEncerrada(Exception):
+    pass
+
+class TentativaInvalida(Exception):
+    pass
+
 def sortear_palavra(db: Session):
     palavra = (
         db.query(Palavra)
@@ -69,10 +75,10 @@ def comparar(tentativa: str, palavra_secreta: str):
 
 def validar_tentativa(tentativa: str, db: Session):
     if len(tentativa) != 5: 
-        raise ValueError("A palavra deve conter 5 letras.")
+        raise TentativaInvalida("A palavra deve conter 5 letras.")
     
     if not tentativa.isalpha():
-        raise ValueError("A palavra deve conter apenas letras.")
+        raise TentativaInvalida("A palavra deve conter apenas letras.")
 
     existe = (
         db.query(Palavra)
@@ -81,7 +87,7 @@ def validar_tentativa(tentativa: str, db: Session):
     )
 
     if not existe:
-        raise ValueError("Palavra inválida.")
+        raise TentativaInvalida("Palavra inválida.")
 
 def controlar_jogada(partida_id: int, jogada: str, db: Session):
     partida = db.query(Partida).filter(Partida.id == partida_id).first()
@@ -89,7 +95,7 @@ def controlar_jogada(partida_id: int, jogada: str, db: Session):
         raise PartidaNaoEncontrada("Partida não encontrada.")
 
     if partida.status != StatusPartida.EM_ANDAMENTO:
-        raise ValueError("Partida já encerrada.")
+        raise PartidaEncerrada("Partida já encerrada.")
 
     jogada = jogada.strip().upper()
     validar_tentativa(jogada, db)
@@ -140,7 +146,7 @@ def consultar_partida(partida_id: int, db: Session):
     )
 
     return {
-        "id": partida.id,
+        "partida_id": partida.id,
         "status": partida.status,
         "tentativas_usadas": partida.qtd_tentativas,
         "tentativas_restantes": MAX_TENTATIVAS - partida.qtd_tentativas,

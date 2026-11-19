@@ -31,7 +31,7 @@ class EstadoPartidaRequest(BaseModel):
     partida_id: str
 
 class EstadoPartidaResponse(BaseModel):
-    id: int
+    partida_id: int
     status: StatusPartida
     tentativas_usadas: int
     tentativas_restantes: int
