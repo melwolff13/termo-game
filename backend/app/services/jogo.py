@@ -147,3 +147,40 @@ def consultar_partida(partida_id: int, db: Session):
         ),
     }
 
+def calcular_estatisticas(jogador_id: str, db: Session):
+    # só partidas encerradas, da mais recente para a mais antiga
+    partidas = (
+        db.query(Partida)
+        .filter(
+            Partida.jogador_id == jogador_id,
+            Partida.status != StatusPartida.EM_ANDAMENTO,
+        )
+        .order_by(Partida.id.desc())
+        .all()
+    )
+
+    qtd_vitorias = sum(1 for p in partidas if p.status == StatusPartida.VENCEU)
+
+    # sequência atual: vitórias seguidas a partir da mais recente
+    sequencia_atual = 0
+    for p in partidas:
+        if p.status != StatusPartida.VENCEU:
+            break
+        sequencia_atual += 1
+
+    # maior sequência: percorre tudo guardando o recorde
+    maior_sequencia = 0
+    contagem = 0
+    for p in partidas:
+        if p.status == StatusPartida.VENCEU:
+            contagem += 1
+            maior_sequencia = max(maior_sequencia, contagem)
+        else:
+            contagem = 0
+
+    return {
+        "qtd_partidas": len(partidas),
+        "qtd_vitorias": qtd_vitorias,
+        "sequencia_atual": sequencia_atual,
+        "maior_sequencia": maior_sequencia,
+    }

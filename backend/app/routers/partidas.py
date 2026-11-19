@@ -3,7 +3,6 @@ from app.schemas.partida import *
 from app.services.jogo import *
 from fastapi import APIRouter, Depends, HTTPException
 from app.database import *
-from sqlalchemy import select, func, desc
 
 router = APIRouter(
     prefix="/partidas",
@@ -44,56 +43,3 @@ def post_tentativa(partida_id: int, body: EnviarTentativaRequest, db: Session = 
     except ValueError as erro:
         raise HTTPException(status_code=422, detail=str(erro))
         
-@router.get("/{jogador_id}/estatistica", response_model=EstatisticaResponse, status_code=200)
-def estatistica_jogador(jogador_id: str, db=Depends(get_db)):
-
-    #1 consulta a quantidade de partidas pelo id do jogador
-    qtd_partida = db.scalar(
-        select(func.count())
-        .select_from(Partida)
-        .filter(Partida.jogador_id == jogador_id)
-        )
-    
-    qtd_vitoria = db.scalar(
-        select(func.count())
-        .select_from(Partida)
-        .filter(Partida.jogador_id == jogador_id, Partida.status == StatusPartida.VENCEU)
-        )
-
-    consulta = (
-        select(Partida)
-        .where(Partida.jogador_id == jogador_id)
-        .order_by(desc(Partida.id))
-        )
-
-    partidas = db.scalars(consulta).all()
-
-    sequencia_atual = 0
-
-    for partida in partidas:
-        if partida.status == StatusPartida.VENCEU:
-            sequencia_atual += 1
-        else:
-            break
-
-    sequencias = set()
-    contagem_sequencia = 0
-    maior_sequencia = 0
-
-    for partida in partidas:
-        if partida.status == StatusPartida.VENCEU:
-            contagem_sequencia += 1
-        else:
-            sequencias.add(contagem_sequencia)
-            contagem_sequencia = 0
-
-    sequencias.add(contagem_sequencia)
-    maior_sequencia = max(sequencias)
-
-    return EstatisticaResponse(
-        qtd_partidas = qtd_partida,
-        qtd_vitorias = qtd_vitoria,
-        sequencia_atual= sequencia_atual,
-        maior_sequencia= maior_sequencia
-        
-    )
