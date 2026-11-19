@@ -32,7 +32,13 @@ def criar_partida(jogador_id: str, db: Session):
     db.commit()
     db.refresh(nova_partida)
 
-    return nova_partida
+    return {
+        "partida_id": nova_partida.id,
+        "jogador_id": nova_partida.jogador_id,
+        "status": StatusPartida.EM_ANDAMENTO,
+        "qtd_tentativas": 0,
+        "tentativas_restantes": MAX_TENTATIVAS
+    }
 
 def comparar(tentativa: str, palavra_secreta: str):
     resultado = []
